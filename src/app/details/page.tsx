@@ -61,10 +61,19 @@ export default function DetailsPage() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real app, you'd store these values.
-    // For now, we'll just navigate to the dashboard.
-    localStorage.setItem('userName', values.name);
-    router.push('/dashboard');
+    // In a real app, you'd use a more robust state management solution.
+    // For this demo, we'll use localStorage.
+    try {
+      localStorage.setItem('userName', values.name);
+      router.push('/dashboard');
+    } catch (error) {
+      console.error("Failed to set user's name in localStorage:", error);
+      toast({
+        title: "Error",
+        description: "Could not save your details. Please try again.",
+        variant: "destructive",
+      });
+    }
   }
 
   function handleVerifyPhone() {

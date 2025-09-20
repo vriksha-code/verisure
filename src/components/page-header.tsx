@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Languages, LogOut } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -17,9 +20,29 @@ interface PageHeaderProps {
 
 export function PageHeader({ onUploadClick }: PageHeaderProps) {
   const router = useRouter();
+  const [userName, setUserName] = useState<string>('');
+
+  useEffect(() => {
+    const storedName = localStorage.getItem('userName');
+    if (storedName) {
+      setUserName(storedName);
+    }
+  }, []);
+  
   const handleLogout = () => {
+    localStorage.removeItem('userName');
     router.push('/login');
   };
+
+  const getInitials = (name: string) => {
+    if (!name) return 'A';
+    const names = name.split(' ');
+    if (names.length > 1) {
+      return names[0][0] + names[names.length - 1][0];
+    }
+    return name[0];
+  }
+
   return (
     <header className="bg-card border-b">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,7 +69,7 @@ export function PageHeader({ onUploadClick }: PageHeaderProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar>
-                    <AvatarFallback>A</AvatarFallback>
+                    <AvatarFallback>{getInitials(userName)}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>

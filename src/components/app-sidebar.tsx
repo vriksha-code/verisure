@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 import {
   SidebarHeader,
   SidebarContent,
@@ -22,13 +23,31 @@ import { LogOut } from 'lucide-react';
 
 export default function AppSidebar() {
   const router = useRouter();
+  const [userName, setUserName] = useState<string>('');
+
+  useEffect(() => {
+    const storedName = localStorage.getItem('userName');
+    if (storedName) {
+      setUserName(storedName);
+    }
+  }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem('userName');
     router.push('/login');
   };
 
   const navigateToDashboard = () => {
     router.push('/dashboard');
+  }
+  
+  const getInitials = (name: string) => {
+    if (!name) return 'A';
+    const names = name.split(' ');
+    if (names.length > 1) {
+      return names[0][0] + names[names.length - 1][0];
+    }
+    return name[0];
   }
 
   return (
@@ -79,11 +98,11 @@ export default function AppSidebar() {
            <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton tooltip="Ankit">
+                <SidebarMenuButton tooltip={userName || 'User'}>
                   <Avatar className="w-8 h-8">
-                    <AvatarFallback>A</AvatarFallback>
+                    <AvatarFallback>{getInitials(userName)}</AvatarFallback>
                   </Avatar>
-                  Ankit
+                  {userName || 'User'}
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="right" align="end" className="w-56">
