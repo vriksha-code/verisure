@@ -45,24 +45,36 @@ const formSchema = z.object({
   phone: z.string().regex(/^\d{10}$/, {
     message: 'Phone number must be 10 digits.',
   }),
+  otp: z.string().optional(),
 });
 
 export default function DetailsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isVerifying, setIsVerifying] = React.useState(false);
+  const [isOtpSent, setIsOtpSent] = React.useState(false);
+  const [isPhoneVerified, setIsPhoneVerified] = React.useState(false);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
       phone: '',
+      otp: '',
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real app, you'd use a more robust state management solution.
-    // For this demo, we'll use localStorage.
+    if (!isPhoneVerified) {
+      toast({
+        title: 'Verification Required',
+        description: 'Please verify your phone number before continuing.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       localStorage.setItem('userName', values.name);
       router.push('/dashboard');
@@ -78,18 +90,45 @@ export default function DetailsPage() {
 
   function handleVerifyPhone() {
     const phone = form.getValues('phone');
-    if (/^\d{10}$/.test(phone)) {
-      setIsVerifying(true);
-      toast({
-        title: 'OTP Sent',
-        description: `An OTP has been sent to ${phone}. (This is a demo)`,
-      });
-      setTimeout(() => {
-        setIsVerifying(false);
-      }, 2000);
-    } else {
-        form.setError("phone", { type: "manual", message: "Please enter a valid 10-digit phone number to verify." });
+    if (!/^\d{10}$/.test(phone)) {
+       form.setError("phone", { type: "manual", message: "Please enter a valid 10-digit phone number to verify." });
+       return;
     }
+
+    setIsVerifying(true);
+    toast({
+      title: 'OTP Sent',
+      description: `An OTP has been sent to ${phone}. (This is a demo, enter any 6 digits)`,
+    });
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsVerifying(false);
+      setIsOtpSent(true);
+    }, 1500);
+  }
+
+  function handleConfirmOtp() {
+    const otp = form.getValues('otp');
+    if (!otp || otp.length !== 6) {
+      form.setError("otp", { type: "manual", message: "Please enter a valid 6-digit OTP." });
+      return;
+    }
+
+    setIsVerifying(true);
+    
+    // Simulate OTP verification
+    setTimeout(() => {
+      setIsVerifying(false);
+      setIsPhoneVerified(true);
+      setIsOtpSent(false); // Hide OTP field
+       toast({
+        title: 'Phone Verified',
+        description: 'Your phone number has been successfully verified.',
+        variant: 'default',
+        className: 'bg-green-500 text-white',
+      });
+    }, 1500);
   }
 
   return (
@@ -173,18 +212,51 @@ export default function DetailsPage() {
                           type="tel"
                           placeholder="e.g., 9876543210"
                           {...field}
+                           disabled={isPhoneVerified}
                         />
                       </FormControl>
-                      <Button type="button" variant="outline" onClick={handleVerifyPhone} disabled={isVerifying}>
-                        {isVerifying ? 'Verifying...' : 'Verify'}
-                      </Button>
+                      {!isPhoneVerified && !isOtpSent && (
+                        <Button type="button" variant="outline" onClick={handleVerifyPhone} disabled={isVerifying}>
+                          {isVerifying ? 'Sending...' : 'Verify'}
+                        </Button>
+                      )}
+                      {isPhoneVerified && (
+                         <Button type="button" variant="outline" disabled className="bg-green-100 dark:bg-green-900 border-green-500 text-green-700 dark:text-green-300">
+                          Verified
+                        </Button>
+                      )}
                     </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+               {isOtpSent && (
+                <FormField
+                  control={form.control}
+                  name="otp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Enter OTP</FormLabel>
+                       <div className="flex items-center space-x-2">
+                          <FormControl>
+                            <Input
+                              type="tel"
+                              placeholder="6-digit OTP"
+                              maxLength={6}
+                              {...field}
+                            />
+                          </FormControl>
+                           <Button type="button" variant="outline" onClick={handleConfirmOtp} disabled={isVerifying}>
+                              {isVerifying ? 'Confirming...' : 'Confirm OTP'}
+                            </Button>
+                       </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={!isPhoneVerified}>
                 Continue to Dashboard
               </Button>
             </form>
