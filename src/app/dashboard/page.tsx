@@ -21,12 +21,44 @@ export default function DashboardPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // On component mount, check if user's name is in localStorage.
-    const storedName = localStorage.getItem('userName');
-    if (storedName) {
-      setUserName(storedName);
+    // On component mount, load data from localStorage.
+    try {
+      const storedName = localStorage.getItem('userName');
+      if (storedName) {
+        setUserName(storedName);
+      }
+      
+      const storedApplications = localStorage.getItem('applications');
+      if (storedApplications) {
+        const parsedApplications = JSON.parse(storedApplications).map((app: any) => ({
+            ...app,
+            submittedAt: new Date(app.submittedAt), // Re-hydrate Date object
+        }));
+        setApplications(parsedApplications);
+      }
+    } catch (error) {
+        console.error("Failed to read from localStorage", error);
+        toast({
+            title: "Error",
+            description: "Could not load your saved data.",
+            variant: "destructive",
+        })
     }
   }, []);
+
+  // Persist applications to localStorage whenever they change.
+  useEffect(() => {
+    try {
+      if (applications.length > 0) {
+        localStorage.setItem('applications', JSON.stringify(applications));
+      } else {
+        // If there are no applications, remove the item from localStorage
+        localStorage.removeItem('applications');
+      }
+    } catch (error) {
+        console.error("Failed to write to localStorage", error);
+    }
+  }, [applications]);
 
   const handleFileSubmit = async (file: File, documentType: DocumentType, userQuery?: string) => {
     setIsUploadDialogOpen(false);
@@ -49,6 +81,8 @@ export default function DashboardPage() {
     reader.readAsDataURL(file);
     reader.onload = async () => {
       const documentUrl = reader.result as string;
+      
+      // Update the specific application with the documentUrl
       setApplications((prev) =>
         prev.map((app) => (app.id === id ? { ...app, documentUrl } : app))
       );
