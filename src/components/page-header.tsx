@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Languages, LogOut } from 'lucide-react';
+import { PlusCircle, Languages, LogOut, Share2 } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeToggle } from './theme-toggle';
 import {
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 interface PageHeaderProps {
   onUploadClick: () => void;
@@ -20,6 +21,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ onUploadClick }: PageHeaderProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
@@ -32,6 +34,14 @@ export function PageHeader({ onUploadClick }: PageHeaderProps) {
   const handleLogout = () => {
     localStorage.removeItem('userName');
     router.push('/login');
+  };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: 'Link Copied',
+      description: 'The dashboard URL has been copied to your clipboard.',
+    });
   };
 
   const getInitials = (name: string) => {
@@ -82,6 +92,10 @@ export function PageHeader({ onUploadClick }: PageHeaderProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <Button variant="outline" onClick={handleShare}>
+              <Share2 className="mr-2 h-4 w-4" />
+              Share
+            </Button>
              <Button onClick={onUploadClick}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Upload Document
