@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import {Toaster} from '@/components/ui/toaster';
+import {ThemeProvider} from '@/components/theme-provider';
 
 export const metadata: Metadata = {
   title: 'VeriSure',
@@ -13,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full dark">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -23,8 +24,14 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased h-full bg-background min-h-screen">
-        {children}
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { ShieldCheck, LayoutDashboard, History, Settings, LifeBuoy } from 'lucide-react';
+import { ThemeToggle } from './theme-toggle';
 
 export default function AppSidebar() {
   return (
@@ -38,6 +39,9 @@ export default function AppSidebar() {
       <SidebarFooter className="p-2">
         <Separator className="my-2 bg-sidebar-border" />
          <SidebarMenu>
+          <SidebarMenuItem>
+            <ThemeToggle />
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="Settings">
               <Settings />
