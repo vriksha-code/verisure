@@ -49,11 +49,9 @@ export default function DashboardPage() {
   // Persist applications to localStorage whenever they change.
   useEffect(() => {
     try {
-        // This effect runs after the initial render, so it won't overwrite on first load.
-        // It will save any subsequent changes to the applications state.
-        localStorage.setItem('applications', JSON.stringify(applications));
+      localStorage.setItem('applications', JSON.stringify(applications));
     } catch (error) {
-        console.error("Failed to write to localStorage", error);
+      console.error("Failed to write to localStorage", error);
     }
   }, [applications]);
 
