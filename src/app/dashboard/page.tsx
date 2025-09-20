@@ -25,7 +25,6 @@ export default function DashboardPage() {
         setUserName(storedName);
       }
     } catch (error) {
-        console.error("Failed to read from localStorage", error);
     }
   }, []);
 
@@ -80,7 +79,6 @@ export default function DashboardPage() {
           )
         );
       } catch (error) {
-        console.error('Verification failed:', error);
         setApplications((prev) =>
           prev.map((app) =>
             app.id === newApplication.id
@@ -101,7 +99,6 @@ export default function DashboardPage() {
     };
 
     reader.onerror = (error) => {
-      console.error('File reading error:', error);
       toast({
         title: 'File Read Error',
         description: 'Could not read the selected file.',

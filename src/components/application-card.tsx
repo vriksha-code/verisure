@@ -80,7 +80,7 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
   const Icon = config.icon;
   const isProcessing = status === 'analyzing' || status === 'pending';
   
-  const timeAgo = formatDistanceToNow(submittedAt, { addSuffix: true });
+  const timeAgo = formatDistanceToNow(new Date(submittedAt), { addSuffix: true });
 
   return (
     <Card className="flex flex-col h-full transition-all hover:shadow-md">
@@ -114,7 +114,7 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
             <FileText className="mr-1.5 h-3 w-3" />
             <span>{formatBytes(fileSize)}</span>
             <span className="mx-1.5">·</span>
-            <time dateTime={submittedAt.toISOString()}>{timeAgo}</time>
+            <time dateTime={new Date(submittedAt).toISOString()}>{timeAgo}</time>
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow flex justify-center items-center py-4">

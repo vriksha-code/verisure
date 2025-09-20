@@ -1,13 +1,5 @@
 'use server';
 
-/**
- * @fileOverview Analyzes a document and verifies specific elements using AI.
- *
- * - analyzeDocumentAndVerify - A function that handles the document analysis and verification process.
- * - AnalyzeDocumentAndVerifyInput - The input type for the analyzeDocumentAndVerify function.
- * - AnalyzeDocumentAndVerifyOutput - The return type for the analyzeDocumentAndVerify function.
- */
-
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 

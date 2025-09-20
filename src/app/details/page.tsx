@@ -79,7 +79,6 @@ export default function DetailsPage() {
       localStorage.setItem('userName', values.name);
       router.push('/dashboard');
     } catch (error) {
-      console.error("Failed to set user's name in localStorage:", error);
       toast({
         title: "Error",
         description: "Could not save your details. Please try again.",
@@ -101,7 +100,6 @@ export default function DetailsPage() {
       description: `An OTP has been sent to ${phone}. (This is a demo, enter any 6 digits)`,
     });
     
-    // Simulate API call
     setTimeout(() => {
       setIsVerifying(false);
       setIsOtpSent(true);
@@ -117,7 +115,6 @@ export default function DetailsPage() {
 
     setIsVerifying(true);
     
-    // Simulate OTP verification
     setTimeout(() => {
       setIsVerifying(false);
       setIsPhoneVerified(true);

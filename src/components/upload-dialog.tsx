@@ -28,8 +28,8 @@ interface UploadDialogProps {
   onSubmit: (file: File, documentType: DocumentType, userQuery?: string) => void;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 const formSchema = z.object({
   documentType: z.enum([
@@ -46,7 +46,7 @@ const formSchema = z.object({
     .refine((files) => files?.[0], 'A file is required.')
     .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
-      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
+      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
       '.jpg, .jpeg, .png, and .webp files are accepted.'
     ),
 }).refine(data => {
@@ -100,7 +100,6 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
           }
           setHasCameraPermission(true);
         } catch (error) {
-          console.error('Error accessing camera:', error);
           setHasCameraPermission(false);
           toast({
             variant: 'destructive',
@@ -183,7 +182,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
               id="document"
               type="file"
               className="hidden"
-              accept={ACCEPTED_FILE_TYPES.join(',')}
+              accept={ACCEPTED_IMAGE_TYPES.join(',')}
               {...register('document')}
               onChange={handleFileChange}
               ref={fileInputRef}
