@@ -16,7 +16,7 @@ export default function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
             <ShieldCheck className="h-8 w-8 text-primary" />
-            <h1 className="text-xl font-bold text-sidebar-foreground">CertiScan</h1>
+            <h1 className="text-xl font-bold text-sidebar-foreground">VeriSure</h1>
         </div>
       </SidebarHeader>
       <SidebarContent className="p-2">

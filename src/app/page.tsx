@@ -1,6 +1,6 @@
 import { Sidebar, SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/app-sidebar';
-import CertiScanDashboard from '@/components/certiscan-dashboard';
+import VeriSureDashboard from '@/components/verisure-dashboard';
 
 export default function Home() {
   return (
@@ -10,7 +10,7 @@ export default function Home() {
       </Sidebar>
       <SidebarInset>
         <main className="flex-1">
-          <CertiScanDashboard />
+          <VeriSureDashboard />
         </main>
       </SidebarInset>
     </SidebarProvider>
