@@ -43,7 +43,7 @@ export default function VeriSureDashboard({ applications, onUploadClick }: VeriS
       {applications.length > 0 ? (
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Your Issued Documents</h2>
+            <h2 className="text-lg font-semibold">Issued Documents</h2>
             <Button variant="link">View All ({applications.length})</Button>
           </div>
           <div className={`grid ${responsiveGridClasses} gap-6`}>
