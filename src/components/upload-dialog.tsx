@@ -29,7 +29,7 @@ interface UploadDialogProps {
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
 
 const formSchema = z.object({
   documentType: z.enum([
@@ -43,11 +43,11 @@ const formSchema = z.object({
   userQuery: z.string().optional(),
   document: z
     .any()
-    .refine((files) => files?.[0], 'An image is required.')
+    .refine((files) => files?.[0], 'A file is required.')
     .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
-      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-      '.jpg, .jpeg, .png and .webp files are accepted.'
+      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
+      '.jpg, .jpeg, .png, .webp, and .pdf files are accepted.'
     ),
 }).refine(data => {
     if (data.documentType === 'Other') {
@@ -65,6 +65,7 @@ type UploadStep = 'select' | 'camera' | 'preview';
 
 export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogProps) {
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<string | null>(null);
   const [uploadStep, setUploadStep] = useState<UploadStep>('select');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
@@ -122,12 +123,18 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
     const file = event.target.files?.[0];
     if (file) {
       setValue('document', event.target.files);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFilePreview(reader.result as string);
+      setFileType(file.type);
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFilePreview(reader.result as string);
+          setUploadStep('preview');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setFilePreview(null); // No preview for non-image files
         setUploadStep('preview');
-      };
-      reader.readAsDataURL(file);
+      }
     }
   };
   
@@ -145,6 +152,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
             setValue('document', dataTransfer.files);
+            setFileType('image/jpeg');
             setFilePreview(canvas.toDataURL('image/jpeg'));
             setUploadStep('preview');
           }
@@ -161,6 +169,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
   const closeDialog = () => {
     reset();
     setFilePreview(null);
+    setFileType(null);
     setUploadStep('select');
     setHasCameraPermission(null);
     onOpenChange(false);
@@ -183,7 +192,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
               id="document"
               type="file"
               className="hidden"
-              accept={ACCEPTED_IMAGE_TYPES.join(',')}
+              accept={ACCEPTED_FILE_TYPES.join(',')}
               {...register('document')}
               onChange={handleFileChange}
               ref={fileInputRef}
@@ -219,8 +228,14 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
       case 'preview':
         return (
           <div className="pt-4">
-            {filePreview && (
+            {filePreview && fileType?.startsWith('image/') ? (
               <img src={filePreview} alt="Preview" className="max-h-60 mx-auto rounded-lg object-contain" />
+            ) : (
+               <div className="text-center p-8 bg-muted rounded-lg">
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-2 text-sm font-medium text-foreground">File ready for upload</p>
+                 <p className="text-xs text-muted-foreground">{watch('document')?.[0]?.name}</p>
+              </div>
             )}
              {errors.document && (
                 <p className="text-sm font-medium text-destructive mt-2 text-center">
@@ -228,9 +243,9 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
                 </p>
               )}
             <div className="flex justify-center gap-4 mt-4">
-              <Button type="button" variant="outline" onClick={() => { setFilePreview(null); setUploadStep('select'); setValue('document', null); }}>
+              <Button type="button" variant="outline" onClick={() => { setFilePreview(null); setFileType(null); setUploadStep('select'); setValue('document', null); }}>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Retake
+                Choose a different file
               </Button>
               <Button type="submit" >
                 <Check className="mr-2 h-4 w-4" />
@@ -249,7 +264,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
           <DialogHeader>
             <DialogTitle className="flex items-center">
               {uploadStep !== 'select' && (
-                 <Button type="button" variant="ghost" size="icon" className="mr-2 h-7 w-7" onClick={() => { setUploadStep('select'); setFilePreview(null); }}>
+                 <Button type="button" variant="ghost" size="icon" className="mr-2 h-7 w-7" onClick={() => { setUploadStep('select'); setFilePreview(null); setFileType(null); }}>
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               )}
@@ -257,7 +272,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
             </DialogTitle>
             {uploadStep === 'select' && 
               <DialogDescription>
-                Capture a photo of your document or upload an existing file.
+                Capture a photo or upload a document file (PDF, JPG, PNG).
               </DialogDescription>
             }
           </DialogHeader>
@@ -311,7 +326,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
           <DialogFooter className="mt-6">
             <Button type="button" variant="ghost" onClick={closeDialog}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting || uploadStep !== 'preview'}>
-              {isSubmitting ? 'Analyzing...' : 'Submit for Analysis'}
+              {isSubmitting ? 'Uploading...' : 'Submit for Analysis'}
             </Button>
           </DialogFooter>
         </form>

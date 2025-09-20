@@ -18,12 +18,13 @@ export interface Application {
   fileName: string;
   fileType: string;
   fileSize: number;
-  documentUrl: string; // data URI
+  documentUrl: string; 
   verificationTask: string;
   status: ApplicationStatus;
   reason?: string;
   submittedAt: Date;
   confidenceScore?: number;
+  userName?: string;
 }
 
 interface VeriSureDashboardProps {
