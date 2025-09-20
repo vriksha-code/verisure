@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,7 +16,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload } from 'lucide-react';
+import { Upload, Camera, ArrowLeft, Check, RefreshCw } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface UploadDialogProps {
   isOpen: boolean;
@@ -31,7 +33,7 @@ const formSchema = z.object({
   verificationTask: z.string().min(10, 'Verification task must be at least 10 characters long.'),
   document: z
     .any()
-    .refine((files) => files?.length == 1, 'An image is required.')
+    .refine((files) => files?.[0], 'An image is required.')
     .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
@@ -41,9 +43,17 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+type UploadStep = 'select' | 'camera' | 'preview';
+
 export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogProps) {
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [uploadStep, setUploadStep] = useState<UploadStep>('select');
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { toast } = useToast();
+
   const {
     register,
     handleSubmit,
@@ -51,6 +61,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
     reset,
     watch,
     setValue,
+    clearErrors,
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -58,7 +69,33 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
     }
   });
 
-  const documentFile = watch('document');
+  useEffect(() => {
+    if (uploadStep === 'camera' && isOpen) {
+      const getCameraPermission = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+          setHasCameraPermission(true);
+        } catch (error) {
+          console.error('Error accessing camera:', error);
+          setHasCameraPermission(false);
+          toast({
+            variant: 'destructive',
+            title: 'Camera Access Denied',
+            description: 'Please enable camera permissions in your browser settings.',
+          });
+        }
+      };
+      getCameraPermission();
+    } else if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+  }, [uploadStep, isOpen, toast]);
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -67,87 +104,162 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
       const reader = new FileReader();
       reader.onloadend = () => {
         setFilePreview(reader.result as string);
+        setUploadStep('preview');
       };
       reader.readAsDataURL(file);
-    } else {
-      setFilePreview(null);
+    }
+  };
+  
+  const handleCapture = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            setValue('document', dataTransfer.files);
+            setFilePreview(canvas.toDataURL('image/jpeg'));
+            setUploadStep('preview');
+          }
+        }, 'image/jpeg');
+      }
     }
   };
 
   const processSubmit: SubmitHandler<FormValues> = (data) => {
     onSubmit(data.document[0], data.verificationTask);
-    reset();
-    setFilePreview(null);
+    closeDialog();
   };
   
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      reset();
-      setFilePreview(null);
-    }
-    onOpenChange(open);
+  const closeDialog = () => {
+    reset();
+    setFilePreview(null);
+    setUploadStep('select');
+    setHasCameraPermission(null);
+    onOpenChange(false);
   }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit(processSubmit)}>
-          <DialogHeader>
-            <DialogTitle>Upload Document</DialogTitle>
-            <DialogDescription>
-              Select a document to analyze and provide the verification instructions.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="document">Document</Label>
-              <div
-                className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {filePreview ? (
-                  <img src={filePreview} alt="Preview" className="max-h-40 rounded-lg object-contain" />
-                ) : (
-                  <div className="space-y-1 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <div className="flex text-sm text-muted-foreground">
-                      <p className="pl-1">Click to upload a file</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">PNG, JPG, WEBP up to 5MB</p>
-                  </div>
-                )}
-              </div>
-              <Input
-                id="document"
-                type="file"
-                className="hidden"
-                accept={ACCEPTED_IMAGE_TYPES.join(',')}
-                {...register('document')}
-                onChange={handleFileChange}
-                ref={fileInputRef}
-              />
-              {errors.document && (
-                <p className="text-sm font-medium text-destructive">
+  const renderContent = () => {
+    switch (uploadStep) {
+      case 'select':
+        return (
+          <div className="grid grid-cols-2 gap-4 pt-4">
+            <Button variant="outline" type="button" className="h-24 flex-col" onClick={() => setUploadStep('camera')}>
+              <Camera className="h-8 w-8 mb-2" />
+              Take Photo
+            </Button>
+            <Button variant="outline" type="button" className="h-24 flex-col" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="h-8 w-8 mb-2" />
+              Upload File
+            </Button>
+            <Input
+              id="document"
+              type="file"
+              className="hidden"
+              accept={ACCEPTED_IMAGE_TYPES.join(',')}
+              {...register('document')}
+              onChange={handleFileChange}
+              ref={fileInputRef}
+            />
+             {errors.document && (
+                <p className="text-sm font-medium text-destructive col-span-2">
                   {errors.document.message as string}
                 </p>
               )}
-            </div>
-            <div className="grid w-full gap-1.5">
-              <Label htmlFor="verificationTask">Verification Task</Label>
-              <Textarea
-                id="verificationTask"
-                placeholder="e.g., Check for a signature on the bottom right."
-                {...register('verificationTask')}
-              />
-              {errors.verificationTask && (
-                <p className="text-sm font-medium text-destructive">
-                  {errors.verificationTask.message}
-                </p>
+          </div>
+        );
+      case 'camera':
+        return (
+          <div className="pt-4">
+            <div className="relative">
+              <video ref={videoRef} className="w-full aspect-video rounded-md bg-black" autoPlay muted playsInline />
+              {hasCameraPermission === false && (
+                <Alert variant="destructive" className="mt-2">
+                  <AlertTitle>Camera Access Required</AlertTitle>
+                  <AlertDescription>
+                    Please allow camera access in your browser to use this feature.
+                  </AlertDescription>
+                </Alert>
               )}
             </div>
+            <div className="flex justify-center mt-4">
+              <Button type="button" size="lg" className="rounded-full w-16 h-16" onClick={handleCapture} disabled={!hasCameraPermission}>
+                <Camera className="h-8 w-8" />
+              </Button>
+            </div>
           </div>
-          <DialogFooter>
-            <Button type="submit" disabled={isSubmitting}>
+        );
+      case 'preview':
+        return (
+          <div className="pt-4">
+            {filePreview && (
+              <img src={filePreview} alt="Preview" className="max-h-60 mx-auto rounded-lg object-contain" />
+            )}
+             {errors.document && (
+                <p className="text-sm font-medium text-destructive mt-2 text-center">
+                  {errors.document.message as string}
+                </p>
+              )}
+            <div className="flex justify-center gap-4 mt-4">
+              <Button type="button" variant="outline" onClick={() => { setFilePreview(null); setUploadStep('select'); setValue('document', null); }}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Retake
+              </Button>
+              <Button type="button" onClick={() => handleSubmit(processSubmit)()} >
+                <Check className="mr-2 h-4 w-4" />
+                Confirm
+              </Button>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={closeDialog}>
+      <DialogContent className="sm:max-w-md">
+        <form onSubmit={handleSubmit(processSubmit)}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              {uploadStep !== 'select' && (
+                 <Button type="button" variant="ghost" size="icon" className="mr-2 h-7 w-7" onClick={() => { setUploadStep('select'); setFilePreview(null); }}>
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              )}
+              Upload Document
+            </DialogTitle>
+            {uploadStep === 'select' && 
+              <DialogDescription>
+                Capture a photo of your document or upload an existing file.
+              </DialogDescription>
+            }
+          </DialogHeader>
+          
+          {renderContent()}
+
+          <div className="grid w-full gap-1.5 mt-4 pt-4 border-t">
+            <Label htmlFor="verificationTask">Verification Task</Label>
+            <Textarea
+              id="verificationTask"
+              placeholder="e.g., Check for a signature on the bottom right."
+              {...register('verificationTask')}
+            />
+            {errors.verificationTask && (
+              <p className="text-sm font-medium text-destructive">
+                {errors.verificationTask.message}
+              </p>
+            )}
+          </div>
+
+          <DialogFooter className="mt-6">
+            <Button type="button" variant="ghost" onClick={closeDialog}>Cancel</Button>
+            <Button type="submit" disabled={isSubmitting || uploadStep !== 'preview'}>
               {isSubmitting ? 'Analyzing...' : 'Submit for Analysis'}
             </Button>
           </DialogFooter>
