@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar, SidebarProvider, SidebarInset, SidebarRail } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/app-sidebar';
 import VeriSureDashboard from '@/components/verisure-dashboard';
@@ -11,27 +11,20 @@ import type { Application } from '@/components/verisure-dashboard';
 import { analyzeDocumentAndVerify } from '@/ai/flows/analyze-document-and-verify';
 import type { AnalyzeDocumentAndVerifyOutput, DocumentType } from '@/ai/flows/analyze-document-and-verify';
 import { useToast } from '@/hooks/use-toast';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 
 export default function DashboardPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [userName, setUserName] = useState<string>('');
-  const [submittedName, setSubmittedName] = useState<string>('');
-  const [nameError, setNameError] = useState<string>('');
   const { toast } = useToast();
 
-  const handleNameSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (userName.trim() === '') {
-        setNameError('Please enter your name.');
-    } else {
-        setSubmittedName(userName);
-        setNameError('');
+  useEffect(() => {
+    // On component mount, check if user's name is in localStorage.
+    const storedName = localStorage.getItem('userName');
+    if (storedName) {
+      setUserName(storedName);
     }
-  };
+  }, []);
 
   const handleFileSubmit = async (file: File, documentType: DocumentType, userQuery?: string) => {
     setIsUploadDialogOpen(false);
@@ -119,25 +112,16 @@ export default function DashboardPage() {
           <PageHeader onUploadClick={() => setIsUploadDialogOpen(true)} />
           <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             <div className='mb-8'>
-              {submittedName ? (
+              {userName ? (
                 <div>
-                  <h1 className="text-2xl font-semibold">Welcome, {submittedName}!</h1>
+                  <h1 className="text-2xl font-semibold">Welcome, {userName}!</h1>
                   <p className="text-muted-foreground">VeriSure 'Issued Documents' are at par with original documents as per IT ACT, 2000</p>
                 </div>
               ) : (
-                <form onSubmit={handleNameSubmit} className="flex items-end gap-2 max-w-sm">
-                    <div className="flex-grow">
-                        <Label htmlFor="name-input">Enter your name</Label>
-                        <Input
-                            id="name-input"
-                            value={userName}
-                            onChange={(e) => setUserName(e.target.value)}
-                            placeholder="e.g., Ankit"
-                        />
-                         {nameError && <p className="text-sm font-medium text-destructive mt-1">{nameError}</p>}
-                    </div>
-                    <Button type="submit">Submit</Button>
-                </form>
+                 <div>
+                  <h1 className="text-2xl font-semibold">Welcome!</h1>
+                  <p className="text-muted-foreground">VeriSure 'Issued Documents' are at par with original documents as per IT ACT, 2000</p>
+                </div>
               )}
             </div>
             <VeriSureDashboard 

@@ -12,9 +12,9 @@ export default function LoginPage() {
 
   const handleLogin = (event: React.FormEvent) => {
     event.preventDefault();
-    // For now, we'll just navigate to the dashboard on any login attempt.
+    // For now, we'll just navigate to the details page on any login attempt.
     // In a real application, you would add authentication logic here.
-    router.push('/dashboard');
+    router.push('/details');
   };
 
   return (
