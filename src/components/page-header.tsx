@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, PlusCircle } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 interface PageHeaderProps {
   onUploadClick: () => void;
@@ -7,13 +8,13 @@ interface PageHeaderProps {
 
 export function PageHeader({ onUploadClick }: PageHeaderProps) {
   return (
-    <header className="bg-card border-b sticky top-0 z-10">
-      <div className="container mx-auto px-4">
+    <header className="bg-background/80 backdrop-blur-sm border-b sticky top-0 z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-3">
-            <ShieldCheck className="h-8 w-8 text-primary" />
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="md:hidden"/>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">
-              CertiScan
+              Dashboard
             </h1>
           </div>
           <Button onClick={onUploadClick}>
