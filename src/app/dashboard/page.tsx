@@ -11,7 +11,7 @@ import type { Application } from '@/components/verisure-dashboard';
 import { analyzeDocumentAndVerify } from '@/ai/flows/analyze-document-and-verify';
 import type { AnalyzeDocumentAndVerifyOutput, DocumentType } from '@/ai/flows/analyze-document-and-verify';
 import { useToast } from '@/hooks/use-toast';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { DashboardBackground } from '@/components/dashboard-background';
 
 
 export default function DashboardPage() {
@@ -105,12 +105,13 @@ export default function DashboardPage() {
 
   return (
     <SidebarProvider>
+       <DashboardBackground />
       <Sidebar collapsible="icon">
         <AppSidebar />
         <SidebarRail />
       </Sidebar>
       <SidebarInset>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-background/80 backdrop-blur-sm">
           <PageHeader onUploadClick={() => setIsUploadDialogOpen(true)} />
           <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             <div className='mb-8'>

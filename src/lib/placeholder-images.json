@@ -1,21 +1,22 @@
+
 {
   "placeholderImages": [
     {
       "id": "ai-doc-1",
       "description": "An abstract representation of artificial intelligence analyzing a document.",
-      "imageUrl": "https://picsum.photos/seed/ai-doc1/600/400",
+      "imageUrl": "https://picsum.photos/seed/ai-doc1/1200/800",
       "imageHint": "ai document"
     },
     {
       "id": "ai-doc-2",
       "description": "A futuristic user interface showing document verification status.",
-      "imageUrl": "https://picsum.photos/seed/ai-doc2/600/400",
+      "imageUrl": "https://picsum.photos/seed/ai-doc2/1200/800",
       "imageHint": "ai verification"
     },
     {
       "id": "ai-doc-3",
       "description": "A visual concept of a neural network processing information from a certificate.",
-      "imageUrl": "https://picsum.photos/seed/ai-doc3/600/400",
+      "imageUrl": "https://picsum.photos/seed/ai-doc3/1200/800",
       "imageHint": "ai network"
     },
     {
@@ -35,6 +36,24 @@
       "description": "A robot hand interacting with a holographic interface, symbolizing AI.",
       "imageUrl": "https://picsum.photos/seed/ai-model3/600/400",
       "imageHint": "ai robot"
+    },
+    {
+      "id": "doc-marksheet-1",
+      "description": "A close-up of a student's marksheet or academic transcript.",
+      "imageUrl": "https://picsum.photos/seed/marksheet1/1200/800",
+      "imageHint": "document marksheet"
+    },
+    {
+      "id": "doc-floorplan-1",
+      "description": "A detailed architectural floor plan with a fire exit highlighted.",
+      "imageUrl": "https://picsum.photos/seed/floorplan1/1200/800",
+      "imageHint": "document floor plan"
+    },
+    {
+      "id": "doc-compliance-1",
+      "description": "A formal compliance certificate with an official seal.",
+      "imageUrl": "https://picsum.photos/seed/compliance1/1200/800",
+      "imageHint": "document verification"
     }
   ]
 }
