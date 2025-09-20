@@ -18,7 +18,7 @@ export interface Application {
   fileName: string;
   fileType: string;
   fileSize: number;
-  documentUrl: string; 
+  documentUrl: string; // This will be a data URI
   verificationTask: string;
   status: ApplicationStatus;
   reason?: string;

@@ -36,24 +36,6 @@
       "description": "A robot hand interacting with a holographic interface, symbolizing AI.",
       "imageUrl": "https://picsum.photos/seed/ai-model3/600/400",
       "imageHint": "ai robot"
-    },
-    {
-      "id": "doc-marksheet-1",
-      "description": "A close-up of a student's marksheet or academic transcript.",
-      "imageUrl": "https://picsum.photos/seed/marksheet1/1200/800",
-      "imageHint": "document marksheet"
-    },
-    {
-      "id": "doc-floorplan-1",
-      "description": "A detailed architectural floor plan with a fire exit highlighted.",
-      "imageUrl": "https://picsum.photos/seed/floorplan1/1200/800",
-      "imageHint": "document floor plan"
-    },
-    {
-      "id": "doc-compliance-1",
-      "description": "A formal compliance certificate with an official seal.",
-      "imageUrl": "https://picsum.photos/seed/compliance1/1200/800",
-      "imageHint": "document verification"
     }
   ]
 }

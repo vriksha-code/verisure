@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Camera, ArrowLeft, Check, RefreshCw } from 'lucide-react';
+import { Upload, Camera, ArrowLeft, Check, RefreshCw, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -29,7 +29,7 @@ interface UploadDialogProps {
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 const formSchema = z.object({
   documentType: z.enum([
@@ -47,7 +47,7 @@ const formSchema = z.object({
     .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
-      '.jpg, .jpeg, .png, .webp, and .pdf files are accepted.'
+      '.jpg, .jpeg, .png, and .webp files are accepted.'
     ),
 }).refine(data => {
     if (data.documentType === 'Other') {
@@ -65,7 +65,6 @@ type UploadStep = 'select' | 'camera' | 'preview';
 
 export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogProps) {
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [fileType, setFileType] = useState<string | null>(null);
   const [uploadStep, setUploadStep] = useState<UploadStep>('select');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
@@ -123,18 +122,12 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
     const file = event.target.files?.[0];
     if (file) {
       setValue('document', event.target.files);
-      setFileType(file.type);
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setFilePreview(reader.result as string);
-          setUploadStep('preview');
-        };
-        reader.readAsDataURL(file);
-      } else {
-        setFilePreview(null); // No preview for non-image files
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result as string);
         setUploadStep('preview');
-      }
+      };
+      reader.readAsDataURL(file);
     }
   };
   
@@ -152,7 +145,6 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
             setValue('document', dataTransfer.files);
-            setFileType('image/jpeg');
             setFilePreview(canvas.toDataURL('image/jpeg'));
             setUploadStep('preview');
           }
@@ -169,7 +161,6 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
   const closeDialog = () => {
     reset();
     setFilePreview(null);
-    setFileType(null);
     setUploadStep('select');
     setHasCameraPermission(null);
     onOpenChange(false);
@@ -228,7 +219,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
       case 'preview':
         return (
           <div className="pt-4">
-            {filePreview && fileType?.startsWith('image/') ? (
+            {filePreview ? (
               <img src={filePreview} alt="Preview" className="max-h-60 mx-auto rounded-lg object-contain" />
             ) : (
                <div className="text-center p-8 bg-muted rounded-lg">
@@ -243,7 +234,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
                 </p>
               )}
             <div className="flex justify-center gap-4 mt-4">
-              <Button type="button" variant="outline" onClick={() => { setFilePreview(null); setFileType(null); setUploadStep('select'); setValue('document', null); }}>
+              <Button type="button" variant="outline" onClick={() => { setFilePreview(null); setUploadStep('select'); setValue('document', null); }}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Choose a different file
               </Button>
@@ -264,7 +255,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
           <DialogHeader>
             <DialogTitle className="flex items-center">
               {uploadStep !== 'select' && (
-                 <Button type="button" variant="ghost" size="icon" className="mr-2 h-7 w-7" onClick={() => { setUploadStep('select'); setFilePreview(null); setFileType(null); }}>
+                 <Button type="button" variant="ghost" size="icon" className="mr-2 h-7 w-7" onClick={() => { setUploadStep('select'); setFilePreview(null); }}>
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               )}
@@ -272,7 +263,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
             </DialogTitle>
             {uploadStep === 'select' && 
               <DialogDescription>
-                Capture a photo or upload a document file (PDF, JPG, PNG).
+                Capture a photo or upload an image file (JPG, PNG, WebP).
               </DialogDescription>
             }
           </DialogHeader>
