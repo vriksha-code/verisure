@@ -1,6 +1,13 @@
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Languages, User } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { ThemeToggle } from './theme-toggle';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface PageHeaderProps {
   onUploadClick: () => void;
@@ -8,19 +15,44 @@ interface PageHeaderProps {
 
 export function PageHeader({ onUploadClick }: PageHeaderProps) {
   return (
-    <header className="bg-background/80 backdrop-blur-sm border-b sticky top-0 z-10">
+    <header className="bg-card border-b">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="md:hidden"/>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">
-              Dashboard
-            </h1>
           </div>
-          <Button onClick={onUploadClick}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Upload Document
-          </Button>
+          <div className="flex items-center gap-4">
+             <ThemeToggle />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Languages className="mr-2 h-4 w-4" />
+                  English
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>English</DropdownMenuItem>
+                <DropdownMenuItem>Español</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem>Logout</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+             <Button onClick={onUploadClick}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Upload Document
+            </Button>
+          </div>
         </div>
       </div>
     </header>

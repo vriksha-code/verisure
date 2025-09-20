@@ -116,14 +116,25 @@ export default function VeriSureDashboard() {
     : "grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4";
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-background">
       <PageHeader onUploadClick={() => setIsUploadDialogOpen(true)} />
       <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <div className='mb-8'>
+          <h1 className="text-2xl font-semibold">Welcome, Ankit!</h1>
+          <p className="text-muted-foreground">VeriSure 'Issued Documents' are at par with original documents as per IT ACT, 2000</p>
+        </div>
+
         {applications.length > 0 ? (
-          <div className={`grid ${responsiveGridClasses} gap-6`}>
-            {applications.map((app) => (
-              <ApplicationCard key={app.id} application={app} />
-            ))}
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Your Issued Documents</h2>
+              <Button variant="link">View All ({applications.length})</Button>
+            </div>
+            <div className={`grid ${responsiveGridClasses} gap-6`}>
+              {applications.map((app) => (
+                <ApplicationCard key={app.id} application={app} />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-center h-full">
