@@ -47,9 +47,6 @@ export default function AppSidebar() {
         <Separator className="my-2 bg-sidebar-border" />
          <SidebarMenu>
           <SidebarMenuItem>
-            <ThemeToggle />
-          </SidebarMenuItem>
-          <SidebarMenuItem>
             <SidebarMenuButton tooltip="Settings">
               <Settings />
               Settings
@@ -61,12 +58,13 @@ export default function AppSidebar() {
               Support
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>
-              <LogOut />
-              Logout
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+           <div className="flex items-center justify-between p-2">
+              <SidebarMenuButton tooltip="Logout" onClick={handleLogout} className="flex-1 justify-start">
+                  <LogOut />
+                  Logout
+              </SidebarMenuButton>
+              <ThemeToggle />
+           </div>
         </SidebarMenu>
       </SidebarFooter>
     </>
