@@ -10,6 +10,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Home, FileText, Search, HardDrive, Settings, LogOut, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 export default function AppSidebar() {
   const router = useRouter();
@@ -64,10 +65,12 @@ export default function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
            <SidebarMenuItem>
-              <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>
-                  <LogOut />
-                  Logout
-              </SidebarMenuButton>
+            <SidebarMenuButton tooltip="Ankit">
+              <Avatar className="w-8 h-8">
+                <AvatarFallback>A</AvatarFallback>
+              </Avatar>
+              Ankit
+            </SidebarMenuButton>
            </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Languages, User } from 'lucide-react';
+import { PlusCircle, Languages, LogOut } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeToggle } from './theme-toggle';
 import {
@@ -8,12 +8,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useRouter } from 'next/navigation';
 
 interface PageHeaderProps {
   onUploadClick: () => void;
 }
 
 export function PageHeader({ onUploadClick }: PageHeaderProps) {
+  const router = useRouter();
+  const handleLogout = () => {
+    router.push('/login');
+  };
   return (
     <header className="bg-card border-b">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,13 +45,18 @@ export function PageHeader({ onUploadClick }: PageHeaderProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
-                  <User />
+                  <Avatar>
+                    <AvatarFallback>A</AvatarFallback>
+                  </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>Profile</DropdownMenuItem>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
              <Button onClick={onUploadClick}>

@@ -558,17 +558,21 @@ const SidebarMenuButton = React.forwardRef<
     const { isMobile, state } = useSidebar()
 
     const button = (
-       <Comp
+      <Comp
         ref={ref}
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), "group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center", className)}
+        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
         {...props}
       >
-        {children}
-        {Array.isArray(children) && children.length > 1 && (
-          <span className="group-data-[collapsible=icon]:hidden">{children[1]}</span>
+        {Array.isArray(children) ? (
+          <>
+            {children[0]}
+            <span className="group-data-[collapsible=icon]:hidden">{children[1]}</span>
+          </>
+        ) : (
+          children
         )}
       </Comp>
     )
