@@ -44,17 +44,14 @@ export default function DashboardPage() {
             variant: "destructive",
         })
     }
-  }, []);
+  }, [toast]);
 
   // Persist applications to localStorage whenever they change.
   useEffect(() => {
     try {
-      if (applications.length > 0) {
+        // This effect runs after the initial render, so it won't overwrite on first load.
+        // It will save any subsequent changes to the applications state.
         localStorage.setItem('applications', JSON.stringify(applications));
-      } else {
-        // If there are no applications, remove the item from localStorage
-        localStorage.removeItem('applications');
-      }
     } catch (error) {
         console.error("Failed to write to localStorage", error);
     }
@@ -145,7 +142,7 @@ export default function DashboardPage() {
         <SidebarRail />
       </Sidebar>
       <SidebarInset>
-        <div className="flex flex-col h-full bg-background/80 backdrop-blur-sm">
+        <div className="flex flex-col h-full">
           <PageHeader onUploadClick={() => setIsUploadDialogOpen(true)} />
           <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             <div className='mb-8'>
