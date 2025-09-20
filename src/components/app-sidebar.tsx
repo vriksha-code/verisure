@@ -8,10 +8,17 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
-import { ShieldCheck, LayoutDashboard, History, Settings, LifeBuoy } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, History, Settings, LifeBuoy, LogOut } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
+import { useRouter } from 'next/navigation';
 
 export default function AppSidebar() {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    router.push('/login');
+  };
+
   return (
     <>
       <SidebarHeader>
@@ -52,6 +59,12 @@ export default function AppSidebar() {
             <SidebarMenuButton tooltip="Support">
               <LifeBuoy />
               Support
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>
+              <LogOut />
+              Logout
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
