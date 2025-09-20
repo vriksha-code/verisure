@@ -17,6 +17,24 @@
       "description": "A visual concept of a neural network processing information from a certificate.",
       "imageUrl": "https://picsum.photos/seed/ai-doc3/600/400",
       "imageHint": "ai network"
+    },
+    {
+      "id": "ai-model-1",
+      "description": "An abstract 3D model representing an AI brain.",
+      "imageUrl": "https://picsum.photos/seed/ai-model1/600/400",
+      "imageHint": "ai model"
+    },
+    {
+      "id": "ai-model-2",
+      "description": "Glowing circuits forming a complex AI data processing image.",
+      "imageUrl": "https://picsum.photos/seed/ai-model2/600/400",
+      "imageHint": "ai data"
+    },
+    {
+      "id": "ai-model-3",
+      "description": "A robot hand interacting with a holographic interface, symbolizing AI.",
+      "imageUrl": "https://picsum.photos/seed/ai-model3/600/400",
+      "imageHint": "ai robot"
     }
   ]
 }
