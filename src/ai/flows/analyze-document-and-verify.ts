@@ -32,6 +32,13 @@ const AnalyzeDocumentAndVerifyOutputSchema = z.object({
       'The verification status of the document, which can be \'verified\', \'rejected\', or \'requires_manual_review\'.'
     ),
   reason: z.string().describe('The reason for the verification status.'),
+  confidenceScore: z
+    .number()
+    .min(0)
+    .max(1)
+    .describe(
+      'The confidence score of the verification decision, from 0 to 1.'
+    ),
 });
 export type AnalyzeDocumentAndVerifyOutput = z.infer<typeof AnalyzeDocumentAndVerifyOutputSchema>;
 
@@ -51,14 +58,16 @@ You will analyze the provided document image and verify the following task: {{{v
 
 Based on your analysis of the document, determine the verification status and provide a reason for your determination.
 
+Also provide a confidence score (from 0 to 1) for your determination. A score of 1 means you are 100% certain, and 0 means you have no confidence.
+
 Consider the following when determining the verification status:
-- If the document clearly meets the verification task, set the status to \'verified\'.
-- If the document clearly fails to meet the verification task, set the status to \'rejected\'.
-- If the document is unclear or requires further review, set the status to \'requires_manual_review\'.
+- If the document clearly meets the verification task, set the status to 'verified'.
+- If the document clearly fails to meet the verification task, set the status to 'rejected'.
+- If the document is unclear or requires further review, set the status to 'requires_manual_review'.
 
 Document Image: {{media url=documentDataUri}}
 
-Return the verification status and reason in a JSON format.
+Return the verification status, reason, and confidence score in a JSON format.
 `,
 });
 

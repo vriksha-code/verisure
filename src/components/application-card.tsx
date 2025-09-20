@@ -17,7 +17,7 @@ import {
   Clock,
   FileText,
 } from 'lucide-react';
-import type { Application, ApplicationStatus } from './certiscan-dashboard';
+import type { Application, ApplicationStatus } from './verisure-dashboard';
 import { formatDistanceToNow } from 'date-fns';
 
 interface ApplicationCardProps {
@@ -75,7 +75,7 @@ function formatBytes(bytes: number, decimals = 2) {
 }
 
 export function ApplicationCard({ application }: ApplicationCardProps) {
-  const { status, fileName, fileSize, documentUrl, verificationTask, reason, submittedAt } = application;
+  const { status, fileName, fileSize, documentUrl, verificationTask, reason, submittedAt, confidenceScore } = application;
   const config = statusConfig[status];
   const Icon = config.icon;
   const isProcessing = status === 'analyzing' || status === 'pending';
@@ -87,21 +87,28 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
             <CardTitle className="text-lg leading-tight break-all">{fileName}</CardTitle>
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Badge variant={config.badgeVariant} className="flex-shrink-0 ml-2">
-                            <Icon className={`mr-1 h-3 w-3 ${config.color} ${isProcessing ? 'animate-spin' : ''}`} />
-                            {config.label}
-                        </Badge>
-                    </TooltipTrigger>
-                    {reason && (
-                        <TooltipContent>
-                            <p>{reason}</p>
-                        </TooltipContent>
-                    )}
-                </Tooltip>
-            </TooltipProvider>
+            <div className="flex items-center gap-2">
+              {confidenceScore !== undefined && !isProcessing && (
+                <Badge variant="outline" className="flex-shrink-0">
+                  {Math.round(confidenceScore * 100)}%
+                </Badge>
+              )}
+              <TooltipProvider>
+                  <Tooltip>
+                      <TooltipTrigger asChild>
+                          <Badge variant={config.badgeVariant} className="flex-shrink-0">
+                              <Icon className={`mr-1 h-3 w-3 ${config.color} ${isProcessing ? 'animate-spin' : ''}`} />
+                              {config.label}
+                          </Badge>
+                      </TooltipTrigger>
+                      {reason && (
+                          <TooltipContent>
+                              <p>{reason}</p>
+                          </TooltipContent>
+                      )}
+                  </Tooltip>
+              </TooltipProvider>
+            </div>
         </div>
         <CardDescription className="flex items-center text-xs">
             <FileText className="mr-1.5 h-3 w-3" />

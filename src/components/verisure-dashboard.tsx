@@ -28,6 +28,7 @@ export interface Application {
   status: ApplicationStatus;
   reason?: string;
   submittedAt: Date;
+  confidenceScore?: number;
 }
 
 export default function VeriSureDashboard() {
@@ -74,6 +75,7 @@ export default function VeriSureDashboard() {
                   ...app,
                   status: result.verificationStatus,
                   reason: result.reason,
+                  confidenceScore: result.confidenceScore,
                 }
               : app
           )
