@@ -19,18 +19,28 @@ import { Textarea } from '@/components/ui/textarea';
 import { Upload, Camera, ArrowLeft, Check, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { DocumentType } from '@/ai/flows/analyze-document-and-verify';
 
 interface UploadDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSubmit: (file: File, verificationTask: string) => void;
+  onSubmit: (file: File, documentType: DocumentType, userQuery?: string) => void;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 const formSchema = z.object({
-  verificationTask: z.string().min(10, 'Verification task must be at least 10 characters long.'),
+  documentType: z.enum([
+    "Aadhaar Card",
+    "10th Marksheet",
+    "12th Marksheet",
+    "Compliance Certificate",
+    "Floor Plan",
+    "Other"
+  ]),
+  userQuery: z.string().optional(),
   document: z
     .any()
     .refine((files) => files?.[0], 'An image is required.')
@@ -39,6 +49,14 @@ const formSchema = z.object({
       (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
       '.jpg, .jpeg, .png and .webp files are accepted.'
     ),
+}).refine(data => {
+    if (data.documentType === 'Other') {
+        return !!data.userQuery && data.userQuery.length >= 10;
+    }
+    return true;
+}, {
+    message: 'Verification task must be at least 10 characters long for "Other" document type.',
+    path: ['userQuery'],
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -61,13 +79,16 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
     reset,
     watch,
     setValue,
+    control,
     clearErrors,
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      verificationTask: 'Check if the document contains a valid signature.',
+      documentType: 'Aadhaar Card',
     }
   });
+
+  const documentType = watch('documentType');
 
   useEffect(() => {
     if (uploadStep === 'camera' && isOpen) {
@@ -133,7 +154,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
   };
 
   const processSubmit: SubmitHandler<FormValues> = (data) => {
-    onSubmit(data.document[0], data.verificationTask);
+    onSubmit(data.document[0], data.documentType as DocumentType, data.userQuery);
     closeDialog();
   };
   
@@ -211,7 +232,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Retake
               </Button>
-              <Button type="button" onClick={() => handleSubmit(processSubmit)()} >
+              <Button type="submit" >
                 <Check className="mr-2 h-4 w-4" />
                 Confirm
               </Button>
@@ -241,21 +262,51 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
             }
           </DialogHeader>
           
-          {renderContent()}
-
           <div className="grid w-full gap-1.5 mt-4 pt-4 border-t">
-            <Label htmlFor="verificationTask">Verification Task</Label>
-            <Textarea
-              id="verificationTask"
-              placeholder="e.g., Check for a signature on the bottom right."
-              {...register('verificationTask')}
+            <Label htmlFor="documentType">Document Type</Label>
+            <Controller
+                control={control}
+                name="documentType"
+                render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a document type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Aadhaar Card">Aadhaar Card</SelectItem>
+                            <SelectItem value="10th Marksheet">10th Marksheet</SelectItem>
+                            <SelectItem value="12th Marksheet">12th Marksheet</SelectItem>
+                            <SelectItem value="Compliance Certificate">Compliance Certificate</SelectItem>
+                            <SelectItem value="Floor Plan">Floor Plan</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                    </Select>
+                )}
             />
-            {errors.verificationTask && (
+            {errors.documentType && (
               <p className="text-sm font-medium text-destructive">
-                {errors.verificationTask.message}
+                {errors.documentType.message}
               </p>
             )}
           </div>
+
+          {documentType === 'Other' && (
+            <div className="grid w-full gap-1.5 mt-4">
+              <Label htmlFor="userQuery">Verification Task</Label>
+              <Textarea
+                id="userQuery"
+                placeholder="e.g., Check for a signature on the bottom right."
+                {...register('userQuery')}
+              />
+              {errors.userQuery && (
+                <p className="text-sm font-medium text-destructive">
+                  {errors.userQuery.message}
+                </p>
+              )}
+            </div>
+          )}
+          
+          {renderContent()}
 
           <DialogFooter className="mt-6">
             <Button type="button" variant="ghost" onClick={closeDialog}>Cancel</Button>

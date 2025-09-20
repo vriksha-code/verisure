@@ -9,7 +9,7 @@ import { PageHeader } from '@/components/page-header';
 import { UploadDialog } from '@/components/upload-dialog';
 import type { Application } from '@/components/verisure-dashboard';
 import { analyzeDocumentAndVerify } from '@/ai/flows/analyze-document-and-verify';
-import type { AnalyzeDocumentAndVerifyOutput } from '@/ai/flows/analyze-document-and-verify';
+import type { AnalyzeDocumentAndVerifyOutput, DocumentType } from '@/ai/flows/analyze-document-and-verify';
 import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardPage() {
@@ -17,7 +17,7 @@ export default function DashboardPage() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleFileSubmit = async (file: File, verificationTask: string) => {
+  const handleFileSubmit = async (file: File, documentType: DocumentType, userQuery?: string) => {
     setIsUploadDialogOpen(false);
 
     const id = crypto.randomUUID();
@@ -27,7 +27,7 @@ export default function DashboardPage() {
       fileType: file.type,
       fileSize: file.size,
       documentUrl: '', // Will be filled after reading
-      verificationTask,
+      verificationTask: documentType === 'Other' && userQuery ? userQuery : `Verify as ${documentType}`,
       status: 'analyzing',
       submittedAt: new Date(),
     };
@@ -45,7 +45,8 @@ export default function DashboardPage() {
       try {
         const result: AnalyzeDocumentAndVerifyOutput = await analyzeDocumentAndVerify({
           documentDataUri: documentUrl,
-          verificationTask: verificationTask,
+          documentType: documentType,
+          userQuery,
         });
 
         setApplications((prev) =>
