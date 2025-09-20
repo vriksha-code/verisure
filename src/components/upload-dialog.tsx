@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -285,7 +285,7 @@ export function UploadDialog({ isOpen, onOpenChange, onSubmit }: UploadDialogPro
             />
             {errors.documentType && (
               <p className="text-sm font-medium text-destructive">
-                {errors.documentType.message}
+                {errors.documentType.message as string}
               </p>
             )}
           </div>
